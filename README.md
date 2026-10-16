@@ -13,17 +13,16 @@
 
 **자동 점검 항목**: 날짜–요일 불일치, 총액·항목 금액 누락, 한글 금액(금일백…원) 불일치, `A × B = C` 계산 오류, 개조식 문체 이탈, "끝." 누락, 마크다운 기호, `[확인 필요]` 표시, 입력·자료에 없는 숫자.
 
-## GitHub Pages 배포
+## GitHub Pages 배포 (GitHub Actions)
 
-```bash
-git init && git add . && git commit -m "POC"
-git branch -M main
-git remote add origin https://github.com/<계정>/<저장소>.git
-git push -u origin main
-```
-저장소 **Settings → Pages → Branch: main / (root)** 선택 후 저장하면 `https://<계정>.github.io/<저장소>/`에서 열립니다.
+`main`에 푸시하면 `.github/workflows/pages.yml`이 자동 실행됩니다.
 
-로컬 확인: `python3 -m http.server` 후 `http://localhost:8000`.
+1. **check**: JS 문법 검사 + `tests/core.test.js`(양식 분석·점검 로직 테스트)
+2. **deploy**: 테스트 통과 시 `index.html`, `assets/`, `samples/`만 모아 Pages에 배포
+
+최초 1회 저장소 **Settings → Pages → Source를 "GitHub Actions"**로 지정해야 합니다. 이후에는 푸시만 하면 `https://jaehwi000.github.io/CREATE_DOC/`에 반영됩니다. Actions 탭에서 수동 실행(workflow_dispatch)도 가능합니다.
+
+로컬 확인: `python3 -m http.server` 후 `http://localhost:8000`, 테스트: `node tests/core.test.js`.
 
 ## 파일 구성
 
@@ -34,6 +33,8 @@ assets/app.js       화면 동작, 파일 파싱(HWPX/DOCX), API 호출
 assets/style.css
 assets/samples.js   가상 예시 데이터 (samples/*.txt 내용)
 samples/            가상 양식 예시와 메모 (실제 대학 문서 아님)
+tests/core.test.js  로직 테스트 (Actions에서 배포 전 실행)
+.github/workflows/  Pages 자동 배포
 ```
 
 ## 데이터·보안
