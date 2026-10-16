@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>행정문서 작성 도우미</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <span class="logo">문</span>
+      <div>
+        <h1>행정문서 작성 도우미 <small>POC</small></h1>
+        <p>우리 학교 양식을 한 번 익혀 두고, 내용만 넣으면 그 양식대로 초안을 씁니다.</p>
+      </div>
+    </div>
+    <nav class="types" role="tablist" aria-label="문서 유형">
+      <button role="tab" data-type="bokmyeong" aria-selected="true">출장복명서</button>
+      <button role="tab" data-type="jichul" aria-selected="false">지출결의서</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <ol class="steps">
+
+    <!-- 1. 양식 예시 -->
+    <li class="step" id="s1">
+      <div class="step-head"><span class="num">1</span><div><h2>양식 예시 올리기</h2><p>실제로 결재된 같은 종류 문서 2~5건. 개인정보는 지우고 올리세요.</p></div></div>
+      <div class="step-body">
+        <label class="drop" id="sampleDrop">
+          <input type="file" id="sampleFile" multiple accept=".txt,.md,.docx,.hwpx">
+          <strong>파일을 끌어다 놓거나 클릭</strong>
+          <span>.hwpx · .docx · .txt 지원 (.hwp는 한글에서 HWPX로 저장 후 업로드)</span>
+        </label>
+        <details class="paste">
+          <summary>본문 텍스트 직접 붙여넣기</summary>
+          <textarea id="samplePaste" rows="7" placeholder="그룹웨어 본문을 복사해서 붙여넣으세요"></textarea>
+          <button class="btn sm" id="samplePasteAdd">예시로 추가</button>
+        </details>
+        <ul class="chips" id="sampleList"></ul>
+        <div class="row gap">
+          <button class="btn ghost sm" id="loadDemo">가상 예시 데이터 불러오기</button>
+          <span class="hint" id="sampleHint"></span>
+        </div>
+      </div>
+    </li>
+
+    <!-- 2. 양식 분석 -->
+    <li class="step" id="s2">
+      <div class="step-head"><span class="num">2</span><div><h2>양식 규칙 분석</h2><p>예시에서 제목·번호 체계·문체·날짜/금액 표기를 뽑아 "양식 프로필"로 저장합니다. 틀린 부분은 고치세요.</p></div></div>
+      <div class="step-body">
+        <div class="row gap">
+          <button class="btn" id="analyze">규칙 분석</button>
+          <button class="btn ghost" id="aiAnalyze" title="API 키 필요">AI로 문체 특징 보완</button>
+          <span class="spacer"></span>
+          <button class="btn ghost sm" id="exportProfile">프로필 내보내기</button>
+          <label class="btn ghost sm file-btn">가져오기<input type="file" id="importProfile" accept=".json"></label>
+        </div>
+        <form class="profile" id="profileForm" hidden>
+          <label>문서 제목 <input name="title"></label>
+          <label>번호 체계 (상위→하위, 쉼표 구분) <input name="numbering"></label>
+          <label class="span2">대항목 순서 (한 줄에 하나) <textarea name="sections" rows="3"></textarea></label>
+          <label class="span2">개요 라벨 (쉼표 구분) <input name="labels"></label>
+          <label>문체
+            <select name="ending">
+              <option>개조식(~함/~음)</option><option>합니다체</option><option>서술형(~다)</option>
+            </select>
+          </label>
+          <label>날짜 형식
+            <select name="dateFormat"><option>2026. 10. 16.</option><option>2026년 10월 16일</option><option>2026-10-16</option></select>
+          </label>
+          <label class="span2">금액 표기 <input name="moneyFormat"></label>
+          <label>첨부 라벨 <input name="attachLabel"></label>
+          <div class="checks">
+            <label><input type="checkbox" name="weekday"> 요일 표기 (금)</label>
+            <label><input type="checkbox" name="useKeut"> 마지막 "끝."</label>
+          </div>
+          <label class="span2">도입 문장 예 (한 줄에 하나) <textarea name="openings" rows="2"></textarea></label>
+          <label class="span2">추가 지침 <textarea name="notes" rows="3" placeholder="예: 기관명은 '우리 대학'으로 표기, 인명 뒤 직급 표기"></textarea></label>
+        </form>
+      </div>
+    </li>
+
+    <!-- 3. 내용 -->
+    <li class="step" id="s3">
+      <div class="step-head"><span class="num">3</span><div><h2>내용 입력</h2><p>확정된 사실은 칸에, 정리 안 된 메모·회의자료는 아래 자료란에. 숫자는 칸에 넣은 값이 우선합니다.</p></div></div>
+      <div class="step-body">
+        <div class="fields" id="fields"></div>
+        <div class="material">
+          <div class="row gap">
+            <h3>참고 자료</h3>
+            <label class="btn ghost sm file-btn">파일 추가<input type="file" id="materialFile" multiple accept=".txt,.md,.docx,.hwpx"></label>
+          </div>
+          <textarea id="material" rows="8" placeholder="출장 메모, 회의자료 요약, 영수증 내역 등을 그대로 붙여넣으세요"></textarea>
+        </div>
+      </div>
+    </li>
+
+    <!-- 4. 생성 -->
+    <li class="step" id="s4">
+      <div class="step-head"><span class="num">4</span><div><h2>초안 생성 · 점검</h2><p>API로 바로 생성하거나, 조립된 프롬프트를 복사해 쓰던 AI에 붙여넣고 결과를 다시 붙여넣으세요.</p></div></div>
+      <div class="step-body">
+        <div class="mode" role="radiogroup">
+          <label><input type="radio" name="mode" value="copy" checked> 프롬프트 복사 (키 불필요)</label>
+          <label><input type="radio" name="mode" value="api"> Claude API 직접 호출</label>
+        </div>
+        <div class="api-box" id="apiBox" hidden>
+          <label>API 키 <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off"></label>
+          <label>모델 <input id="model" value="claude-sonnet-5-5"></label>
+          <label class="inline"><input type="checkbox" id="rememberKey"> 이 브라우저에 키 저장</label>
+          <p class="hint">키는 서버 없이 이 브라우저에서 Anthropic API로만 전송됩니다. 공용 PC에서는 저장하지 마세요.</p>
+        </div>
+        <div class="row gap">
+          <button class="btn primary" id="generate">초안 만들기</button>
+          <button class="btn ghost" id="copyPrompt">프롬프트 복사</button>
+          <span class="hint" id="genStatus"></span>
+        </div>
+        <details class="prompt-view"><summary>조립된 프롬프트 보기</summary><pre id="promptPreview"></pre></details>
+        <div class="out-grid">
+          <div>
+            <div class="row gap"><h3>결과</h3><span class="spacer"></span>
+              <button class="btn ghost sm" id="copyOut">복사</button>
+              <button class="btn ghost sm" id="saveOut">.txt 저장</button>
+            </div>
+            <textarea id="output" rows="22" placeholder="생성 결과가 여기에 표시됩니다. 다른 AI에서 받은 결과를 붙여넣어도 점검됩니다."></textarea>
+          </div>
+          <aside>
+            <h3>자동 점검</h3>
+            <ul class="checks-list" id="checks"><li class="muted">결과가 생기면 날짜·요일, 금액 합계, 문체, 누락 항목을 확인합니다.</li></ul>
+          </aside>
+        </div>
+      </div>
+    </li>
+  </ol>
+  <footer class="foot">입력 내용은 이 브라우저(localStorage)에만 저장되며 서버로 전송되지 않습니다. API 호출 시에만 Anthropic으로 전송됩니다.</footer>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/samples.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
